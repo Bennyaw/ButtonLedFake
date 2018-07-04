@@ -18,7 +18,7 @@ void turnOnLedIfButtonIsPressed(void)
 void doTapTurnOnTapTurnOffLed(LedButtonInfo *info)
 { 
 	int nowButtonState = getButtonState(); // function to generate a random button state
-	static int count;
+	static int count = 0;
 	// case LED state is OFF
   if((info->currentLedState) == LED_OFF) 
   {
@@ -36,16 +36,19 @@ void doTapTurnOnTapTurnOffLed(LedButtonInfo *info)
 		}
 		else if(nowButtonState == BUTTON_RELEASED && info->previousButtonState == BUTTON_RELEASED)
 		{
-			info->currentLedState = LED_OFF;
-			info->previousButtonState = BUTTON_RELEASED;
-      count++;
+			if(count == 1)
+			{
+				info->currentLedState = LED_OFF;
+				info->previousButtonState = BUTTON_RELEASED;
+				turnLed(LED_OFF);
+			}
+			else
+			{
+				info->currentLedState = LED_OFF;
+				info->previousButtonState = BUTTON_RELEASED;
+			}
+			
 		}
-    else if(nowButtonState == BUTTON_RELEASED && info->previousButtonState == BUTTON_RELEASED && (count ==1))
-    {
-      info->currentLedState = LED_OFF;
-      turnLed(LED_OFF);
-			info->previousButtonState = BUTTON_RELEASED;
-    }
 
   }
   else    // case LED is ON
@@ -55,16 +58,38 @@ void doTapTurnOnTapTurnOffLed(LedButtonInfo *info)
 			info->currentLedState = LED_ON; // then set the CURRENT LED state is ON
 			info->previousButtonState = BUTTON_RELEASED; // 
 		}
-		else if(nowButtonState = BUTTON_PRESSED)
+		else if(nowButtonState = BUTTON_PRESSED &&  info->previousButtonState != BUTTON_RELEASED)
 		{
-			info->currentLedState = LED_OFF;
-			//turnLed(LED_OFF);
-			info->previousButtonState = BUTTON_PRESSED;
+			if(count == 2)
+			{
+				info->currentLedState = LED_ON;
+				turnLed(LED_ON);
+				info->previousButtonState = BUTTON_PRESSED;
+			}
+			else
+			{
+				info->currentLedState = LED_ON;
+				info->previousButtonState = BUTTON_PRESSED;
+			}
+		}
+		else if(nowButtonState = BUTTON_PRESSED &&  info->previousButtonState == BUTTON_RELEASED)
+		{
+			if(count == 0)
+			{
+				info->currentLedState = LED_ON;
+				info->previousButtonState = BUTTON_PRESSED;
+			}
+			else
+			{
+				info->currentLedState = LED_OFF;
+				info->previousButtonState = BUTTON_PRESSED;
+			}
+			
 		}
 
     
   }
-  
+  count++;
   if(count == 3)//reset 
   {
     count = 0;
